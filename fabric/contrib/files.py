@@ -48,7 +48,7 @@ def first(*args, **kwargs):
 
 
 def upload_template(filename, destination, context=None, use_jinja=False,
-    template_dir=None, use_sudo=False):
+    template_dir=None, use_sudo=False, backup=True):
     """
     Render and upload a template text file to a remote host.
 
@@ -99,16 +99,17 @@ def upload_template(filename, destination, context=None, use_jinja=False,
     os.remove(tempfile_name)
 
     func = use_sudo and sudo or run
-    # Back up any original file (need to do figure out ultimate destination)
-    to_backup = destination
-    with settings(hide('everything'), warn_only=True):
-        # Is destination a directory?
-        if func('test -f %s' % to_backup).failed:
-            # If so, tack on the filename to get "real" destination
-            to_backup = destination + '/' + basename
-    if exists(to_backup):
-        func("cp %s %s.bak" % (to_backup, to_backup))
-    # Actually move uploaded template to destination
+    if backup:
+        # Back up any original file (need to do figure out ultimate destination)
+        to_backup = destination
+        with settings(hide('everything'), warn_only=True):
+            # Is destination a directory?
+            if func('test -f %s' % to_backup).failed:
+                # If so, tack on the filename to get "real" destination
+                to_backup = destination + '/' + basename
+        if exists(to_backup):
+            func("cp %s %s.bak" % (to_backup, to_backup))
+        # Actually move uploaded template to destination
     func("mv %s %s" % (temp_destination, destination))
 
 
