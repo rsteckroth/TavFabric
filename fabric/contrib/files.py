@@ -89,7 +89,7 @@ def upload_template(filename, destination, context=None, use_jinja=False,
         with open(filename) as inputfile:
             text = inputfile.read()
         if context:
-            text = text.format(context)
+            text = text.format(**context)
     output.write(text)
     output.close()
 
